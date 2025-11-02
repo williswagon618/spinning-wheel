@@ -9,14 +9,14 @@ const STORAGE_KEY = 'prizeWheelItems';
 
 function defaultPrizes() {
     return [
-        { label: 'Chores', color: '#ff6384' },
-        { label: 'Candy', color: '#36a2eb' },
-        { label: 'Prize', color: '#cc65fe' },
+        { label: 'Chores   ', color: '#ff6384' },
+        { label: 'Candy   ', color: '#36a2eb' },
+        { label: 'Prize   ', color: '#cc65fe' },
         { label: 'Mystery ???', color: '#22ab2b' },
-        { label: 'Clean Up', color: '#ffcc00' },
-        { label: 'Mom Picks', color: '#ff9f40' },
-        { label: 'Dad Picks', color: '#4bc0c0' },
-        { label: 'Free Spin', color: '#9966ff' }
+        { label: 'Clean Up   ', color: '#ffcc00' },
+        { label: 'Mom Picks   ', color: '#ff9f40' },
+        { label: 'Dad Picks   ', color: '#4bc0c0' },
+        { label: 'Free Spin   ', color: '#9966ff' }
     ];
 }
 
