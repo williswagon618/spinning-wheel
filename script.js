@@ -48,6 +48,8 @@ const ctx = canvas.getContext('2d');
 const spinBtn = document.getElementById('spinBtn');
 const resultEl = document.getElementById('result');
 const countdownEl = document.getElementById('countdown');
+const postCountdownEl = document.getElementById('postTimeout');
+const centerControls = document.querySelector('.center-controls');
 
 // prize form elements
 const prizeForm = document.getElementById('prizeForm');
@@ -227,13 +229,29 @@ function onSpinComplete(finalDeg) {
     const original = segments[winner.originalIndex];
     
     resultEl.textContent = `You won: ${original.label}`;
-    spinBtn.disabled = false;
-    setFormEnabled(true);
-    spinning = false;
+    // stop spin feedback and play the win sound
     stopSpinFeedback();
     playWinSound();
-    
-    // Keep displaySegments for consistent doubled display
+    spinning = false;
+
+    // If the prize is a free spin, allow immediate re-spin (no post timeout).
+    const labelNorm = String(original.label || '').toLowerCase().trim();
+    const isFreeSpin = labelNorm === 'free spin' || labelNorm === 'freespin' || labelNorm === 'free-spin';
+    if (isFreeSpin) {
+        // re-enable controls immediately
+        spinBtn.disabled = false;
+        setFormEnabled(true);
+        if (centerControls) centerControls.classList.remove('locked');
+    } else {
+        // Keep UI locked briefly: start a 2-minute post-spin timeout during which
+        // the user cannot start another spin. This uses the center post-timeout
+        // display to show remaining lockout time.
+        spinBtn.disabled = true;
+        setFormEnabled(false);
+        startPostTimeout(5 * 60 * 1000);
+    }
+
+    // Keep doubled display consistent
     drawWheel();
 }
 
@@ -254,7 +272,7 @@ function spin() {
     const targetIndex = Math.floor(Math.random() * count);
 
     // choose a number of extra rotations for visual effect (always at least 2)
-    const minRotations = 2;
+    const minRotations = 5;
     const extraRotations = Math.floor(Math.random() * 4) + minRotations; // 2..5
 
     // compute rotation so the target index lands at the top pointer
@@ -311,6 +329,17 @@ let ticksEnabled = false;
 let countdownRaf = null;
 let countdownStart = 0;
 let countdownDuration = 0;
+// post-spin timeout (prevent immediate re-spin)
+let postCountdownRaf = null;
+let postCountdownStart = 0;
+let postCountdownDuration = 0;
+
+function formatMsToMMSS(ms) {
+    const totalSec = Math.ceil(ms / 1000);
+    const mm = Math.floor(totalSec / 60);
+    const ss = totalSec % 60;
+    return `${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`;
+}
 
 function ensureAudioContext() {
     if (!audioCtx) {
@@ -376,6 +405,59 @@ function updateCountdown() {
         countdownRaf = null;
         if (countdownEl) countdownEl.classList.remove('running');
     }
+}
+
+// Post-spin timeout: prevents re-spinning for a fixed duration after a spin completes
+function updatePostCountdown() {
+    if (!postCountdownStart) return;
+    const elapsed = performance.now() - postCountdownStart;
+    const remaining = Math.max(0, postCountdownDuration - elapsed);
+    // show mm:ss in the center post-timeout display
+    if (postCountdownEl) postCountdownEl.textContent = formatMsToMMSS(remaining);
+    if (remaining > 0) {
+        postCountdownRaf = requestAnimationFrame(updatePostCountdown);
+    } else {
+        postCountdownRaf = null;
+        postCountdownStart = 0;
+        if (postCountdownEl) {
+            postCountdownEl.classList.remove('running');
+            postCountdownEl.textContent = '';
+        }
+        // re-enable controls after timeout
+        spinBtn.disabled = false;
+        setFormEnabled(true);
+        if (centerControls) centerControls.classList.remove('locked');
+    }
+}
+
+function startPostTimeout(ms) {
+    // ensure any existing post timeout is cleared
+    if (postCountdownRaf) cancelAnimationFrame(postCountdownRaf);
+    postCountdownDuration = ms;
+    postCountdownStart = performance.now();
+    if (postCountdownEl) {
+        postCountdownEl.classList.add('running');
+        // immediate display in mm:ss
+        postCountdownEl.textContent = formatMsToMMSS(ms);
+    }
+    if (centerControls) centerControls.classList.add('locked');
+    postCountdownRaf = requestAnimationFrame(updatePostCountdown);
+}
+
+function stopPostTimeout() {
+    if (postCountdownRaf) {
+        cancelAnimationFrame(postCountdownRaf);
+        postCountdownRaf = null;
+    }
+    postCountdownStart = 0;
+    if (postCountdownEl) {
+        postCountdownEl.classList.remove('running');
+        postCountdownEl.textContent = '';
+    }
+    if (centerControls) centerControls.classList.remove('locked');
+    // ensure controls are enabled when stopping the timeout early
+    spinBtn.disabled = false;
+    setFormEnabled(true);
 }
 
 function startCountdown(ms) {

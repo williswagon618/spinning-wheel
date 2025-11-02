@@ -16,10 +16,15 @@
           <canvas id="wheel" width="500" height="500" aria-label="Prize wheel"></canvas>
           <!-- pointer/indicator -->
           <div class="pointer" aria-hidden="true"></div>
+
+          <!-- center controls (fills wheel center): spin button + post-timeout display -->
+          <div class="center-controls" aria-hidden="false">
+            <button id="spinBtn" type="button">Spin</button>
+            <div id="postTimeout" class="post-timeout" aria-live="polite" aria-atomic="true"></div>
+          </div>
         </div>
 
         <div class="controls">
-          <button id="spinBtn" type="button">Spin</button>
           <div id="result" class="result" aria-live="polite"></div>
         </div>
 
