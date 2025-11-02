@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Prize Wheel</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app">
+      <h1 style="padding-bottom: 25px;">Prize Wheel</h1>
+
+      <section class="wheel-area">
+        <div class="wheel-wrap">
+          <!-- canvas is drawn dynamically; we rotate this element to spin -->
+          <canvas id="wheel" width="500" height="500" aria-label="Prize wheel"></canvas>
+          <!-- pointer/indicator -->
+          <div class="pointer" aria-hidden="true"></div>
+        </div>
+
+        <div class="controls">
+          <button id="spinBtn" type="button">Spin</button>
+          <div id="result" class="result" aria-live="polite"></div>
+        </div>
+
+        <!-- countdown display -->
+        <div id="countdown" class="countdown" aria-live="polite" aria-atomic="true">10.0s</div>
+
+        <!-- Prize editor: add / remove prizes dynamically -->
+        <form id="prizeForm" class="prize-form" aria-label="Add prize">
+          <input id="prizeLabel" name="label" type="text" placeholder="Prize label" required />
+          <input id="prizeColor" name="color" type="color" value="#ff6384" />
+          <button id="addPrizeBtn" type="submit">Add</button>
+        </form>
+
+        <ul id="prizeList" class="prize-list" aria-live="polite"></ul>
+      </section>
+
+      <footer class="notes">
+        <small>Example structure: customize prizes in <code>script.js</code>.</small>
+      </footer>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
